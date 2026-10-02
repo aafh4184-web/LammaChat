@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لمّة شات — نسخة تجريبية</title>
+<style>
+:root{--bg:#eef2f7;--panel:#fff;--text:#18212f;--muted:#718096;--accent:#2563eb;--bubble:#e8eefc;--me:#2563eb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Tahoma,sans-serif;color:var(--text)}
+.app{max-width:430px;height:100vh;max-height:900px;margin:auto;background:var(--panel);display:flex;flex-direction:column;overflow:hidden}
+header{background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;padding:18px 16px 14px}
+.brand{font-size:24px;font-weight:800}.sub{font-size:12px;opacity:.85;margin-top:4px}
+.search{margin-top:14px;background:#fff1;border:1px solid #ffffff33;border-radius:14px;padding:11px 13px;color:#fff;width:100%;outline:none}
+.search::placeholder{color:#ffffffaa}
+.content{flex:1;overflow:auto}.screen{display:none;height:100%}.screen.active{display:block}
+.chats{padding:8px}.chat{display:flex;align-items:center;gap:12px;padding:13px 10px;border-bottom:1px solid #edf0f5;cursor:pointer}
+.avatar{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#dbeafe;font-weight:700;color:#1d4ed8;flex:none}
+.info{flex:1;min-width:0}.name{font-weight:700}.last{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:5px}
+.time{font-size:11px;color:var(--muted)}
+.empty{padding:50px 25px;text-align:center;color:var(--muted)}
+.chathead{display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid #e8ebf0}
+.back{border:0;background:transparent;font-size:24px;cursor:pointer}.online{font-size:12px;color:#16a34a;margin-top:3px}
+.messages{padding:18px 12px;display:flex;flex-direction:column;gap:9px;overflow:auto;flex:1;background:#f8fafc}
+.msg{max-width:78%;padding:10px 13px;border-radius:17px;line-height:1.45;font-size:14px}
+.them{align-self:flex-start;background:#fff;border:1px solid #e7eaf0;border-bottom-left-radius:5px}
+.me{align-self:flex-end;background:var(--me);color:white;border-bottom-right-radius:5px}
+.composer{display:flex;gap:8px;padding:10px;border-top:1px solid #e8ebf0;background:#fff}
+.composer input{flex:1;border:1px solid #dbe1ea;border-radius:22px;padding:11px 14px;outline:none}
+.send{border:0;border-radius:50%;width:44px;height:44px;background:var(--accent);color:white;font-size:18px;cursor:pointer}
+.bottom{display:flex;border-top:1px solid #e8ebf0;background:#fff}.tab{flex:1;padding:12px;border:0;background:#fff;color:var(--muted);cursor:pointer}.tab.active{color:var(--accent);font-weight:700}
+.profile{padding:28px 20px;text-align:center}.bigavatar{width:88px;height:88px;margin:auto;border-radius:50%;display:grid;place-items:center;background:#dbeafe;color:#1d4ed8;font-size:30px;font-weight:800}.profile h2{margin:12px 0 4px}.profile p{color:var(--muted)}
+.btn{border:0;background:var(--accent);color:#fff;border-radius:12px;padding:12px 20px;cursor:pointer}
+@media(min-width:600px){.app{margin:20px auto;border-radius:24px;box-shadow:0 12px 40px #0002;height:850px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header id="homeHeader">
+  <div class="brand">لمّة شات</div><div class="sub">نسخة تجريبية — دردشة بسيطة وسريعة</div>
+  <input class="search" id="search" placeholder="ابحث عن محادثة...">
+</header>
+
+<div class="content">
+  <section id="home" class="screen active">
+    <div class="chats" id="chatList"></div>
+  </section>
+
+  <section id="conversation" class="screen" style="display:none;flex-direction:column">
+    <div class="chathead">
+      <button class="back" onclick="goHome()">‹</button>
+      <div class="avatar" id="chatAvatar">م</div>
+      <div><div class="name" id="chatName">محمد</div><div class="online">متصل الآن</div></div>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="composer">
+      <input id="messageInput" placeholder="اكتب رسالة..." onkeydown="if(event.key==='Enter')sendMessage()">
+      <button class="send" onclick="sendMessage()">➤</button>
+    </div>
+  </section>
+
+  <section id="profile" class="screen">
+    <div class="profile">
+      <div class="bigavatar">أ</div><h2>أحمد</h2><p>حساب تجريبي</p>
+      <button class="btn" onclick="alert('سيتم إضافة تعديل الحساب في النسخة القادمة')">تعديل الحساب</button>
+    </div>
+  </section>
+</div>
+
+<div class="bottom">
+  <button class="tab active" id="tabChats" onclick="showTab('home')">💬<br>المحادثات</button>
+  <button class="tab" id="tabProfile" onclick="showTab('profile')">👤<br>حسابي</button>
+</div>
+</div>
+
+<script>
+const chats=[
+ {id:1,name:'محمد',initial:'م',last:'عامل إيه؟',time:'10:42 ص',msgs:[['them','عامل إيه؟'],['me','تمام الحمد لله 👍']]},
+ {id:2,name:'أحمد',initial:'أ',last:'هنكمل المشروع إمتى؟',time:'9:18 ص',msgs:[['them','هنكمل المشروع إمتى؟']]},
+ {id:3,name:'محمود',initial:'م',last:'بعتلك الصورة',time:'أمس',msgs:[['them','بعتلك الصورة'],['me','تمام وصلت، شكراً']]},
+ {id:4,name:'الجروب',initial:'ل',last:'أهلاً بيكم في لمّة شات',time:'أمس',msgs:[['them','أهلاً بيكم في لمّة شات 👋']]}
+];
+let current=null;
+const list=document.getElementById('chatList');
+function renderList(filter=''){
+ list.innerHTML='';
+ chats.filter(c=>c.name.includes(filter)).forEach(c=>{
+  const d=document.createElement('div');d.className='chat';d.onclick=()=>openChat(c.id);
+  d.innerHTML=`<div class="avatar">${c.initial}</div><div class="info"><div class="name">${c.name}</div><div class="last">${c.last}</div></div><div class="time">${c.time}</div>`;
+  list.appendChild(d);
+ });
+ if(!list.children.length) list.innerHTML='<div class="empty">لا توجد محادثات مطابقة</div>';
+}
+function openChat(id){
+ current=chats.find(c=>c.id===id);
+ document.getElementById('home').classList.remove('active');document.getElementById('profile').classList.remove('active');
+ const cv=document.getElementById('conversation');cv.style.display='flex';cv.classList.add('active');
+ document.getElementById('homeHeader').style.display='none';
+ document.getElementById('chatName').textContent=current.name;document.getElementById('chatAvatar').textContent=current.initial;
+ renderMessages();document.getElementById('messageInput').focus();
+}
+function renderMessages(){
+ const box=document.getElementById('messages');box.innerHTML='';
+ current.msgs.forEach(m=>{const d=document.createElement('div');d.className='msg '+m[0];d.textContent=m[1];box.appendChild(d)});
+ box.scrollTop=box.scrollHeight;
+}
+function sendMessage(){
+ const inp=document.getElementById('messageInput'),v=inp.value.trim();if(!v)return;
+ current.msgs.push(['me',v]);current.last=v;renderMessages();inp.value='';
+ setTimeout(()=>{current.msgs.push(['them','تمام 👍']);current.last='تمام 👍';renderMessages();renderList(document.getElementById('search').value)},600);
+}
+function goHome(){
+ document.getElementById('conversation').style.display='none';document.getElementById('conversation').classList.remove('active');
+ document.getElementById('home').classList.add('active');document.getElementById('homeHeader').style.display='block';renderList(document.getElementById('search').value);
+}
+function showTab(tab){
+ if(tab==='profile'){
+  goHome();document.getElementById('home').classList.remove('active');document.getElementById('profile').classList.add('active');
+  document.getElementById('tabChats').classList.remove('active');document.getElementById('tabProfile').classList.add('active');
+ }else{
+  document.getElementById('profile').classList.remove('active');document.getElementById('home').classList.add('active');
+  document.getElementById('tabProfile').classList.remove('active');document.getElementById('tabChats').classList.add('active');
+ }
+}
+document.getElementById('search').addEventListener('input',e=>renderList(e.target.value));
+renderList();
+</script>
+</body>
+</html>
